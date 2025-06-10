@@ -3,14 +3,38 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Calendar, User, ArrowRight } from 'lucide-react';
 
 const EventsSection = () => {
   const [titleRef, titleVisible] = useScrollAnimation();
   const [eventsRef, eventsVisible] = useScrollAnimation();
   const [terminalRef, terminalVisible] = useScrollAnimation();
+  const [blogRef, blogVisible] = useScrollAnimation();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchLatestBlogPosts();
+  }, []);
+
+  const fetchLatestBlogPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('id, title, excerpt, author, created_at, category')
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+      setBlogPosts(data || []);
+    } catch (error) {
+      console.error('Error fetching blog posts:', error);
+    }
+  };
 
   const handleCardMouseMove = (e: React.MouseEvent, index: number) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -51,6 +75,15 @@ const EventsSection = () => {
       color: "secondary"
     }
   ];
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'announcement': return 'bg-primary/20 text-primary border-primary/30';
+      case 'social': return 'bg-secondary/20 text-secondary border-secondary/30';
+      case 'event': return 'bg-accent/20 text-accent border-accent/30';
+      default: return 'bg-muted/20 text-muted-foreground border-muted/30';
+    }
+  };
 
   return (
     <section id="events" className="py-20 bg-card/20">
@@ -153,12 +186,61 @@ const EventsSection = () => {
           </div>
         </div>
 
-        <div className="text-center mt-12">
-          <Button asChild className="bg-primary hover:bg-primary/80 text-primary-foreground font-fira">
-            <Link to="/blog">
-              Read Our Blog & Announcements
-            </Link>
-          </Button>
+        {/* Blog Section */}
+        <div 
+          ref={blogRef}
+          className={`mt-20 scroll-fade-in ${blogVisible ? 'animate' : ''}`}
+        >
+          <div className="text-center mb-12">
+            <h3 className="text-2xl md:text-4xl font-orbitron font-bold mb-4 relative">
+              <span className="text-primary relative z-10">Latest from Our Blog</span>
+            </h3>
+            <div className="w-16 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-4"></div>
+            <p className="text-base font-fira text-muted-foreground max-w-xl mx-auto">
+              Stay updated with our latest announcements, tech insights, and club activities
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {blogPosts.map((post, index) => (
+              <Card key={post.id} className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300">
+                <CardHeader className="pb-3">
+                  <div className={`inline-block px-2 py-1 rounded-full text-xs font-fira uppercase tracking-wider mb-2 border ${getCategoryColor(post.category)}`}>
+                    {post.category}
+                  </div>
+                  <CardTitle className="text-lg font-orbitron text-primary line-clamp-2">
+                    {post.title}
+                  </CardTitle>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <User size={12} />
+                      <span className="font-fira">{post.author}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar size={12} />
+                      <span className="font-fira">
+                        {new Date(post.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-foreground/70 font-fira text-sm line-clamp-3 mb-4">
+                    {post.excerpt}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <Button asChild className="bg-primary hover:bg-primary/80 text-primary-foreground font-fira">
+              <Link to="/blog" className="flex items-center gap-2">
+                View All Posts
+                <ArrowRight size={16} />
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     </section>
