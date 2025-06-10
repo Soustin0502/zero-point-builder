@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, User, Eye, ExternalLink, ChevronDown } from 'lucide-react';
+import { Calendar, User, Eye, ExternalLink, ChevronDown, ChevronUp, Instagram } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
@@ -27,6 +27,7 @@ const Blog = () => {
   const [postsRef, postsVisible] = useScrollAnimation();
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
   const scrollToNextSection = () => {
     const postsSection = document.querySelector('#blog-posts');
@@ -54,6 +55,18 @@ const Blog = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const togglePostExpansion = (postId: string) => {
+    setExpandedPosts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+      }
+      return newSet;
+    });
   };
 
   const getCategoryColor = (category: string) => {
@@ -107,8 +120,9 @@ const Blog = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 text-primary">
+            <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 text-primary relative">
               Latest Posts
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto"></div>
           </motion.div>
@@ -146,78 +160,104 @@ const Blog = () => {
               initial="hidden"
               animate={postsVisible ? "visible" : "hidden"}
             >
-              {blogPosts.map((post) => (
-                <motion.div
-                  key={post.id}
-                  variants={{
-                    hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0 }
-                  }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <Card className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 overflow-hidden h-full">
-                    {post.featured_image_url && (
-                      <div className="relative">
-                        <img 
-                          src={post.featured_image_url} 
-                          alt={post.title}
-                          className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
-                          loading="lazy"
-                        />
-                        <div className="absolute top-4 left-4">
-                          <Badge className={getCategoryColor(post.category)}>
-                            {post.category}
-                          </Badge>
+              {blogPosts.map((post) => {
+                const isExpanded = expandedPosts.has(post.id);
+                return (
+                  <motion.div
+                    key={post.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                    transition={{ duration: 0.5 }}
+                    className={isExpanded ? "md:col-span-2 lg:col-span-3" : ""}
+                  >
+                    <Card className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 overflow-hidden h-full">
+                      {post.featured_image_url && (
+                        <div className="relative">
+                          <img 
+                            src={post.featured_image_url} 
+                            alt={post.title}
+                            className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+                            loading="lazy"
+                          />
+                          <div className="absolute top-4 left-4">
+                            <Badge className={getCategoryColor(post.category)}>
+                              {post.category}
+                            </Badge>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    
-                    <CardHeader>
-                      <CardTitle className="text-xl font-orbitron text-primary line-clamp-2">
-                        {post.title}
-                      </CardTitle>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <User size={14} />
-                          <span className="font-fira">{post.author}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar size={14} />
-                          <span className="font-fira">
-                            {new Date(post.created_at).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-                    </CardHeader>
-
-                    <CardContent className="space-y-4 flex-1 flex flex-col">
-                      <p className="text-foreground/80 font-fira text-sm line-clamp-3 flex-1">
-                        {post.excerpt}
-                      </p>
+                      )}
                       
-                      <div className="flex gap-2 mt-auto">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="flex-1 font-fira"
-                        >
-                          <Eye size={16} className="mr-2" />
-                          Read More
-                        </Button>
-                        {post.instagram_post_url && (
+                      <CardHeader>
+                        <CardTitle className="text-xl font-orbitron text-primary line-clamp-2">
+                          {post.title}
+                        </CardTitle>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <User size={14} />
+                            <span className="font-fira">{post.author}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar size={14} />
+                            <span className="font-fira">
+                              {new Date(post.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="space-y-4 flex-1 flex flex-col">
+                        <div className="flex-1">
+                          {isExpanded ? (
+                            <div className="prose prose-sm max-w-none font-fira text-foreground/80">
+                              {post.content.split('\n').map((paragraph, index) => (
+                                <p key={index} className="mb-4">{paragraph}</p>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-foreground/80 font-fira text-sm line-clamp-3">
+                              {post.excerpt}
+                            </p>
+                          )}
+                        </div>
+                        
+                        <div className="flex gap-2 mt-auto flex-wrap">
                           <Button 
                             variant="outline" 
-                            size="sm"
-                            onClick={() => window.open(post.instagram_post_url, '_blank')}
+                            size="sm" 
+                            className="flex-1 font-fira"
+                            onClick={() => togglePostExpansion(post.id)}
                           >
-                            <ExternalLink size={16} />
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp size={16} className="mr-2" />
+                                Show Less
+                              </>
+                            ) : (
+                              <>
+                                <Eye size={16} className="mr-2" />
+                                Read More
+                              </>
+                            )}
                           </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                          {post.instagram_post_url && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => window.open(post.instagram_post_url, '_blank')}
+                              className="flex items-center gap-1"
+                            >
+                              <Instagram size={16} />
+                              <span className="hidden sm:inline">Instagram</span>
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           )}
         </div>

@@ -12,6 +12,8 @@ import Members from "./pages/Members";
 import Events from "./pages/Events";
 import Blog from "./pages/Blog";
 import BlogForm from "./pages/BlogForm";
+import BlogAdmin from "./pages/BlogAdmin";
+import Feedbacks from "./pages/Feedbacks";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
@@ -35,6 +37,8 @@ const App = () => {
           <Route path="/events" element={<Events />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/new" element={<BlogForm />} />
+          <Route path="/blog/admin" element={<BlogAdmin />} />
+          <Route path="/feedbacks" element={<Feedbacks />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
