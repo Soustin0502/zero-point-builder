@@ -189,9 +189,9 @@ const BlogAdmin = () => {
                   </div>
                   <div>
                     <Label htmlFor="category">Category</Label>
-                    <Select onValueChange={handleSelectChange}>
+                    <Select value={formData.category} onValueChange={handleSelectChange}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a category" value={formData.category} />
+                        <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="announcement">Announcement</SelectItem>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,15 +14,19 @@ interface Event {
   id: string;
   title: string;
   description: string;
-  date: string;
-  time: string;
-  location: string;
+  event_date: string;
+  venue?: string;
   max_participants: number;
-  registered_participants: number;
+  current_participants: number;
   status: string;
-  prize?: string;
-  image_url: string;
-  event_url?: string;
+  event_type: string;
+  featured_image_url?: string;
+  registration_link?: string;
+  results_url?: string;
+  created_at: string;
+  updated_at: string;
+  registration_deadline?: string;
+  winners?: any;
 }
 
 const Events = () => {
@@ -39,7 +44,7 @@ const Events = () => {
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .order('date', { ascending: true });
+        .order('event_date', { ascending: true });
 
       if (error) throw error;
       setEvents(data || []);
@@ -81,41 +86,33 @@ const Events = () => {
           </CardTitle>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Calendar size={14} />
-            <span className="font-fira">{new Date(event.date).toLocaleDateString()}</span>
+            <span className="font-fira">{new Date(event.event_date).toLocaleDateString()}</span>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-3">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Clock size={14} />
-            <span className="font-fira">{event.time}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <MapPin size={14} />
-            <span className="font-fira">{event.location}</span>
-          </div>
+          {event.venue && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin size={14} />
+              <span className="font-fira">{event.venue}</span>
+            </div>
+          )}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Users size={14} />
             <span className="font-fira">
-              {event.registered_participants} / {event.max_participants}
+              {event.current_participants} / {event.max_participants}
             </span>
           </div>
           <Badge variant="secondary" className={getStatusColor(event.status)}>
             {event.status}
           </Badge>
-          {event.prize && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Trophy size={14} />
-              <span className="font-fira">Prize: {event.prize}</span>
-            </div>
-          )}
           <p className="text-foreground/80 font-fira text-sm leading-relaxed">
             {event.description}
           </p>
-          {event.event_url && (
+          {event.registration_link && (
             <Button asChild variant="link" className="w-fit p-0">
-              <a href={event.event_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                Learn More
+              <a href={event.registration_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                Register Now
                 <ExternalLink size={16} />
               </a>
             </Button>
@@ -126,7 +123,7 @@ const Events = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
       
       {/* Hero Section */}
@@ -160,7 +157,7 @@ const Events = () => {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 text-primary relative">
-              All Events
+              Upcoming Events
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto"></div>

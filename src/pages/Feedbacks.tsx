@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, User, Calendar } from 'lucide-react';
+import { Star, User, Calendar, ChevronDown } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
@@ -56,8 +56,15 @@ const Feedbacks = () => {
     ));
   };
 
+  const scrollToNextSection = () => {
+    const testimonialSection = document.getElementById('testimonials');
+    if (testimonialSection) {
+      testimonialSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
       
       {/* Hero Section */}
@@ -78,6 +85,14 @@ const Feedbacks = () => {
             </p>
           </motion.div>
         </div>
+
+        <button 
+          onClick={scrollToNextSection}
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer bg-transparent border-none"
+          aria-label="Scroll to next section"
+        >
+          <ChevronDown className="text-primary" size={24} />
+        </button>
       </section>
 
       {/* Testimonials Section */}
@@ -177,7 +192,23 @@ const Feedbacks = () => {
       </section>
 
       {/* Feedback Form Section */}
-      <FeedbackForm />
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 text-primary relative">
+              Share Your Experience
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto"></div>
+          </motion.div>
+          <FeedbackForm />
+        </div>
+      </section>
 
       <Footer />
     </div>
