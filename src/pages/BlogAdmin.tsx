@@ -1,24 +1,21 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { motion } from 'framer-motion';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Send } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const BlogAdmin = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const [titleRef, titleVisible] = useScrollAnimation();
+  const [formRef, formVisible] = useScrollAnimation();
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -29,24 +26,46 @@ const BlogAdmin = () => {
     instagram_post_url: '',
     published: false
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (value: string) => {
+    setFormData(prev => ({ ...prev, category: value }));
+  };
+
+  const handleSwitchChange = (checked: boolean) => {
+    setFormData(prev => ({ ...prev, published: checked }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('blog_posts')
-        .insert([formData]);
+        .insert([
+          {
+            title: formData.title,
+            content: formData.content,
+            excerpt: formData.excerpt,
+            author: formData.author,
+            category: formData.category,
+            featured_image_url: formData.featured_image_url,
+            instagram_post_url: formData.instagram_post_url,
+            published: formData.published
+          }
+        ]);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      toast({
-        title: "Success!",
-        description: "Blog post has been created successfully.",
-      });
-
-      // Reset form
       setFormData({
         title: '',
         content: '',
@@ -58,177 +77,167 @@ const BlogAdmin = () => {
         published: false
       });
 
-      navigate('/blog');
-    } catch (error) {
-      console.error('Error creating blog post:', error);
+      toast({
+        title: "Success",
+        description: "Blog post created successfully.",
+      });
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to create blog post. Please try again.",
-        variant: "destructive",
+        description: error.message,
       });
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
-  };
-
-  const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="flex items-center gap-4 mb-8">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/blog')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft size={16} />
-              Back to Blog
-            </Button>
-            <h1 className="text-3xl md:text-5xl font-orbitron font-bold text-primary">
-              Create New Blog Post
+      {/* Hero Section */}
+      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div className="container mx-auto px-4 text-center z-10">
+          <motion.div 
+            ref={titleRef}
+            initial={{ opacity: 0, y: 20 }}
+            animate={titleVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl md:text-7xl font-orbitron font-bold mb-6 relative">
+              <span className="text-cyber relative z-10">Admin Panel</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
             </h1>
-          </div>
+            <p className="text-xl font-fira text-foreground/80 max-w-3xl mx-auto mb-8">
+              Create and manage blog posts for WarP Computer Club
+            </p>
+          </motion.div>
+        </div>
+      </section>
 
-          <Card className="bg-card/50 cyber-border max-w-4xl mx-auto">
-            <CardHeader>
-              <CardTitle className="text-2xl font-orbitron text-primary">
-                Blog Post Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="title" className="font-fira">Title *</Label>
+      {/* Blog Form Section */}
+      <section id="blog-form" className="py-20">
+        <div className="container mx-auto px-4">
+          <motion.div 
+            ref={formRef}
+            initial={{ opacity: 0, y: 20 }}
+            animate={formVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 text-primary relative">
+              Create New Post
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto"></div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={formVisible ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+          >
+            <Card className="bg-card/50 cyber-border">
+              <CardHeader>
+                <CardTitle className="text-xl font-orbitron text-primary">Blog Post Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="title">Title</Label>
                     <Input
+                      type="text"
                       id="title"
+                      name="title"
                       value={formData.title}
-                      onChange={(e) => handleInputChange('title', e.target.value)}
-                      placeholder="Enter blog post title"
+                      onChange={handleChange}
                       required
-                      className="font-fira"
                     />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="author" className="font-fira">Author *</Label>
+                  <div>
+                    <Label htmlFor="content">Content</Label>
+                    <Textarea
+                      id="content"
+                      name="content"
+                      value={formData.content}
+                      onChange={handleChange}
+                      rows={6}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="excerpt">Excerpt</Label>
                     <Input
-                      id="author"
-                      value={formData.author}
-                      onChange={(e) => handleInputChange('author', e.target.value)}
-                      placeholder="Author name"
+                      type="text"
+                      id="excerpt"
+                      name="excerpt"
+                      value={formData.excerpt}
+                      onChange={handleChange}
                       required
-                      className="font-fira"
                     />
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="excerpt" className="font-fira">Excerpt</Label>
-                  <Textarea
-                    id="excerpt"
-                    value={formData.excerpt}
-                    onChange={(e) => handleInputChange('excerpt', e.target.value)}
-                    placeholder="Brief description of the post"
-                    className="font-fira"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="content" className="font-fira">Content *</Label>
-                  <Textarea
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) => handleInputChange('content', e.target.value)}
-                    placeholder="Write your blog post content here..."
-                    required
-                    className="font-fira min-h-[200px]"
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="category" className="font-fira">Category</Label>
-                    <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                  <div>
+                    <Label htmlFor="author">Author</Label>
+                    <Input
+                      type="text"
+                      id="author"
+                      name="author"
+                      value={formData.author}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="category">Category</Label>
+                    <Select onValueChange={handleSelectChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a category" value={formData.category} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="announcement">Announcement</SelectItem>
-                        <SelectItem value="social">Social Media</SelectItem>
                         <SelectItem value="event">Event</SelectItem>
-                        <SelectItem value="tech">Tech News</SelectItem>
+                        <SelectItem value="tutorial">Tutorial</SelectItem>
+                        <SelectItem value="news">News</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="featured_image" className="font-fira">Featured Image URL</Label>
+                  <div>
+                    <Label htmlFor="featured_image_url">Featured Image URL</Label>
                     <Input
-                      id="featured_image"
+                      type="url"
+                      id="featured_image_url"
+                      name="featured_image_url"
                       value={formData.featured_image_url}
-                      onChange={(e) => handleInputChange('featured_image_url', e.target.value)}
-                      placeholder="https://example.com/image.jpg"
-                      className="font-fira"
+                      onChange={handleChange}
                     />
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="instagram_url" className="font-fira">Instagram Post URL (Optional)</Label>
-                  <Input
-                    id="instagram_url"
-                    value={formData.instagram_post_url}
-                    onChange={(e) => handleInputChange('instagram_post_url', e.target.value)}
-                    placeholder="https://instagram.com/p/..."
-                    className="font-fira"
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="published"
-                    checked={formData.published}
-                    onCheckedChange={(checked) => handleInputChange('published', checked)}
-                  />
-                  <Label htmlFor="published" className="font-fira">Publish immediately</Label>
-                </div>
-
-                <div className="flex gap-4 pt-6">
-                  <Button 
-                    type="submit" 
-                    disabled={loading}
-                    className="flex items-center gap-2 bg-primary hover:bg-primary/80"
-                  >
-                    {formData.published ? <Send size={16} /> : <Save size={16} />}
-                    {loading ? 'Saving...' : (formData.published ? 'Publish' : 'Save Draft')}
+                  <div>
+                    <Label htmlFor="instagram_post_url">Instagram Post URL</Label>
+                    <Input
+                      type="url"
+                      id="instagram_post_url"
+                      name="instagram_post_url"
+                      value={formData.instagram_post_url}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Label htmlFor="published">Published</Label>
+                    <Switch
+                      id="published"
+                      checked={formData.published}
+                      onCheckedChange={handleSwitchChange}
+                    />
+                  </div>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Submitting..." : "Create Post"}
                   </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    onClick={() => navigate('/blog')}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+                </form>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
 
       <Footer />
     </div>
