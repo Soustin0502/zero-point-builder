@@ -185,66 +185,6 @@ const EventsSection = () => {
             </div>
           </div>
         </div>
-
-        {/* Blog Section */}
-        <div 
-          ref={blogRef}
-          className={`mt-20 scroll-fade-in ${blogVisible ? 'animate' : ''}`}
-        >
-          <div className="text-center mb-12">
-            <h3 className="text-2xl md:text-4xl font-orbitron font-bold mb-4 relative">
-              <span className="text-primary relative z-10">Latest from Our Blog</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110 opacity-100 pointer-events-none"></div>
-            </h3>
-            <div className="w-16 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-4"></div>
-            <p className="text-base font-fira text-muted-foreground max-w-xl mx-auto">
-              Stay updated with our latest announcements, tech insights, and club activities
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto justify-center">
-            {blogPosts.map((post, index) => (
-              <Card key={post.id} className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 w-full max-w-md mx-auto">
-                <CardHeader className="pb-3">
-                  <div className={`inline-block px-2 py-1 rounded-full text-xs font-fira uppercase tracking-wider mb-2 border ${getCategoryColor(post.category)}`}>
-                    {post.category}
-                  </div>
-                  <CardTitle className="text-lg font-orbitron text-primary line-clamp-2">
-                    {post.title}
-                  </CardTitle>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <User size={12} />
-                      <span className="font-fira">{post.author}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Calendar size={12} />
-                      <span className="font-fira">
-                        {new Date(post.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-foreground/70 font-fira text-sm line-clamp-4 mb-4">
-                    {post.excerpt}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-8">
-            <Button asChild className="bg-primary hover:bg-primary/80 text-primary-foreground font-fira">
-              <Link to="/blog" className="flex items-center gap-2">
-                View All Posts
-                <ArrowRight size={16} />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    </section>
   );
 };
 
