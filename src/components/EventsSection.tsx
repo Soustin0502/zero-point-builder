@@ -94,7 +94,7 @@ const EventsSection = () => {
         >
           <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative">
             <span className="text-cyber relative z-10">Our Events</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110 opacity-100 pointer-events-none"></div>
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-6"></div>
           <p className="text-lg font-fira text-muted-foreground max-w-2xl mx-auto">
@@ -194,6 +194,7 @@ const EventsSection = () => {
           <div className="text-center mb-12">
             <h3 className="text-2xl md:text-4xl font-orbitron font-bold mb-4 relative">
               <span className="text-primary relative z-10">Latest from Our Blog</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110 opacity-100 pointer-events-none"></div>
             </h3>
             <div className="w-16 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-4"></div>
             <p className="text-base font-fira text-muted-foreground max-w-xl mx-auto">
@@ -201,9 +202,9 @@ const EventsSection = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto justify-center">
             {blogPosts.map((post, index) => (
-              <Card key={post.id} className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300">
+              <Card key={post.id} className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 w-full max-w-md mx-auto">
                 <CardHeader className="pb-3">
                   <div className={`inline-block px-2 py-1 rounded-full text-xs font-fira uppercase tracking-wider mb-2 border ${getCategoryColor(post.category)}`}>
                     {post.category}
@@ -225,7 +226,7 @@ const EventsSection = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <p className="text-foreground/70 font-fira text-sm line-clamp-3 mb-4">
+                  <p className="text-foreground/70 font-fira text-sm line-clamp-4 mb-4">
                     {post.excerpt}
                   </p>
                 </CardContent>

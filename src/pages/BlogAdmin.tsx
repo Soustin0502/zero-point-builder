@@ -1,93 +1,145 @@
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { motion } from 'framer-motion';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Navbar from "@/components/Navbar";
+// import Footer from "@/components/Footer";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import SkeletonLoader from "@/components/SkeletonLoader";
+
+interface BlogPost {
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  category: string;
+  excerpt?: string;
+  featured_image_url?: string;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 const BlogAdmin = () => {
   const [titleRef, titleVisible] = useScrollAnimation();
-  const [formRef, formVisible] = useScrollAnimation();
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    excerpt: '',
-    author: '',
-    category: 'announcement',
-    featured_image_url: '',
-    instagram_post_url: '',
-    published: false
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const [formData, setFormData] = useState({
+    title: "",
+    content: "",
+    author: "",
+    category: "",
+    imageUrl: "",
+    excerpt: "",
+    published: false
+  });
 
-  const handleSelectChange = (value: string) => {
-    setFormData(prev => ({ ...prev, category: value }));
-  };
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
-  const handleSwitchChange = (checked: boolean) => {
-    setFormData(prev => ({ ...prev, published: checked }));
+  const fetchPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setPosts(data || []);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch posts. Please try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .insert([
-          {
-            title: formData.title,
-            content: formData.content,
-            excerpt: formData.excerpt,
-            author: formData.author,
-            category: formData.category,
-            featured_image_url: formData.featured_image_url,
-            instagram_post_url: formData.instagram_post_url,
-            published: formData.published
-          }
-        ]);
-
-      if (error) {
-        throw error;
-      }
-
-      setFormData({
-        title: '',
-        content: '',
-        excerpt: '',
-        author: '',
-        category: 'announcement',
-        featured_image_url: '',
-        instagram_post_url: '',
-        published: false
-      });
-
+      const { error } = await supabase
+        .from("blog_posts")
+        .insert([{
+          title: formData.title,
+          content: formData.content,
+          author: formData.author,
+          category: formData.category,
+          featured_image_url: formData.imageUrl,
+          excerpt: formData.excerpt,
+          published: formData.published,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }]);
+      if (error) throw error;
       toast({
         title: "Success",
-        description: "Blog post created successfully.",
+        description: "Post created successfully!",
       });
-    } catch (error: any) {
+      setFormData({
+        title: "",
+        content: "",
+        author: "",
+        category: "",
+        imageUrl: "",
+        excerpt: "",
+        published: false
+      });
+      fetchPosts();
+    } catch (error) {
+      console.error("Error creating post:", error);
       toast({
+        variant: "destructive",
         title: "Error",
-        description: error.message,
+        description: "Failed to create post. Please try again.",
       });
-    } finally {
-      setIsSubmitting(false);
+    }
+  };
+
+  const handleEdit = (postId: string) => {
+    navigate(`/admin/blog/edit/${postId}`);
+  };
+
+  const handleDelete = async (postId: string) => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+    try {
+      const { error } = await supabase
+        .from("blog_posts")
+        .delete()
+        .eq("id", postId);
+      if (error) throw error;
+      toast({
+        title: "Success",
+        description: "Post deleted successfully!",
+      });
+      fetchPosts();
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete post. Please try again.",
+      });
     }
   };
 
@@ -96,150 +148,239 @@ const BlogAdmin = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
-        <div className="container mx-auto px-4 text-center z-10">
+      <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-background/90 z-10" />
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-0 -left-1/2 w-[100rem] h-[100rem] bg-primary/20 rounded-full blur-3xl" />
+            <div className="absolute bottom 0 -right-1/2 w-[100rem] h-[100rem] bg-secondary/20 rounded-full blur-3xl" />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="container mx-auto px-4 text-center relative z-20">
           <motion.div 
             ref={titleRef}
             initial={{ opacity: 0, y: 20 }}
             animate={titleVisible ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
+            className="space-y-6"
           >
-            <h1 className="text-4xl md:text-7xl font-orbitron font-bold mb-6 relative">
+            <h1 className="text-4xl md:text-7xl font-orbitron font-bold mb-6 relative inline-block">
               <span className="text-cyber relative z-10">Admin Panel</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-[100px] scale-150" />
             </h1>
-            <p className="text-xl font-fira text-foreground/80 max-w-3xl mx-auto mb-8">
-              Create and manage blog posts for WarP Computer Club
+            
+            <p className="text-xl font-fira text-foreground/80 max-w-3xl mx-auto mb-12">
+              Manage and create engaging content for WarP Computer Club
             </p>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+              <div className="p-6 bg-card/30 backdrop-blur-sm border border-primary/20 rounded-lg cyber-box">
+                <h3 className="text-2xl font-orbitron text-primary mb-2">{posts.length}</h3>
+                <p className="text-sm text-foreground/60">Total Posts</p>
+              </div>
+              <div className="p-6 bg-card/30 backdrop-blur-sm border border-secondary/20 rounded-lg cyber-box">
+                <h3 className="text-2xl font-orbitron text-secondary mb-2">
+                  {posts.filter(post => post.published).length}
+                </h3>
+                <p className="text-sm text-foreground/60">Published Posts</p>
+              </div>
+              <div className="p-6 bg-card/30 backdrop-blur-sm border border-accent/20 rounded-lg cyber-box">
+                <h3 className="text-2xl font-orbitron text-accent mb-2">
+                  {posts.filter(post => !post.published).length}
+                </h3>
+                <p className="text-sm text-foreground/60">Draft Posts</p>
+              </div>
+            </div>
           </motion.div>
         </div>
+
+        {/* Decorative Elements */}
+        <div className="absolute inset-0 bg-grid-white/10 bg-grid-16 [mask-image:radial-gradient(white,transparent_85%)] pointer-events-none" />
       </section>
 
-      {/* Blog Form Section */}
-      <section id="blog-form" className="py-20">
-        <div className="container mx-auto px-4">
-          <motion.div 
-            ref={formRef}
-            initial={{ opacity: 0, y: 20 }}
-            animate={formVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 text-primary relative">
-              Create New Post
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
+      <div className="container mx-auto px-4">
+        {/* Create New Post Section */}
+        <section className="py-20">
+          <div className="text-center relative mb-16">
+            <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative inline-block">
+              <span className="text-cyber relative z-10">Create New Post</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-[100px] scale-150" />
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto"></div>
-          </motion.div>
+            <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-4"></div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={formVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-          >
-            <Card className="bg-card/50 cyber-border">
-              <CardHeader>
-                <CardTitle className="text-xl font-orbitron text-primary">Blog Post Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">Title</Label>
-                    <Input
-                      type="text"
-                      id="title"
-                      name="title"
-                      value={formData.title}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="content">Content</Label>
-                    <Textarea
-                      id="content"
-                      name="content"
-                      value={formData.content}
-                      onChange={handleChange}
-                      rows={6}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="excerpt">Excerpt</Label>
-                    <Input
-                      type="text"
-                      id="excerpt"
-                      name="excerpt"
-                      value={formData.excerpt}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="author">Author</Label>
-                    <Input
-                      type="text"
-                      id="author"
-                      name="author"
-                      value={formData.author}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="category">Category</Label>
-                    <Select value={formData.category} onValueChange={handleSelectChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="announcement">Announcement</SelectItem>
-                        <SelectItem value="event">Event</SelectItem>
-                        <SelectItem value="tutorial">Tutorial</SelectItem>
-                        <SelectItem value="news">News</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="featured_image_url">Featured Image URL</Label>
-                    <Input
-                      type="url"
-                      id="featured_image_url"
-                      name="featured_image_url"
-                      value={formData.featured_image_url}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="instagram_post_url">Instagram Post URL</Label>
-                    <Input
-                      type="url"
-                      id="instagram_post_url"
-                      name="instagram_post_url"
-                      value={formData.instagram_post_url}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Label htmlFor="published">Published</Label>
-                    <Switch
-                      id="published"
-                      checked={formData.published}
-                      onCheckedChange={handleSwitchChange}
-                    />
-                  </div>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Submitting..." : "Create Post"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-      </section>
+          <Card className="bg-card/50 cyber-box">
+            <CardHeader>
+              <CardTitle className="text-xl font-orbitron text-primary">Blog Post Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    required
+                    className="bg-background/50"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="excerpt">Excerpt</Label>
+                  <Textarea
+                    id="excerpt"
+                    value={formData.excerpt}
+                    onChange={(e) =>
+                      setFormData({ ...formData, excerpt: e.target.value })
+                    }
+                    placeholder="Brief summary of the post"
+                    className="min-h-[100px] bg-background/50"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="content">Content</Label>
+                  <Textarea
+                    id="content"
+                    value={formData.content}
+                    onChange={(e) =>
+                      setFormData({ ...formData, content: e.target.value })
+                    }
+                    required
+                    className="min-h-[200px] bg-background/50"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="author">Author</Label>
+                  <Input
+                    id="author"
+                    value={formData.author}
+                    onChange={(e) =>
+                      setFormData({ ...formData, author: e.target.value })
+                    }
+                    required
+                    className="bg-background/50"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="category">Category</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, category: value })
+                    }
+                    required
+                  >
+                    <SelectTrigger className="bg-background/50">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="technology">Technology</SelectItem>
+                      <SelectItem value="programming">Programming</SelectItem>
+                      <SelectItem value="cybersecurity">Cybersecurity</SelectItem>
+                      <SelectItem value="ai">Artificial Intelligence</SelectItem>
+                      <SelectItem value="events">Events</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="imageUrl">Featured Image URL</Label>
+                  <Input
+                    id="imageUrl"
+                    value={formData.imageUrl}
+                    onChange={(e) =>
+                      setFormData({ ...formData, imageUrl: e.target.value })
+                    }
+                    placeholder="https://example.com/image.jpg"
+                    className="bg-background/50"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="published"
+                    checked={formData.published}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, published: checked as boolean })
+                    }
+                  />
+                  <Label htmlFor="published">Publish immediately</Label>
+                </div>
+                <Button type="submit" className="w-full">
+                  Create Post
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </section>
 
-      <Footer />
+        {/* Existing Posts Section */}
+        <section className="py-20">
+          <div className="text-center relative mb-16">
+            <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative inline-block">
+              <span className="text-cyber relative z-10">Manage Existing Posts</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-[100px] scale-150" />
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-4"></div>
+          </div>
+
+          {loading ? (
+            <SkeletonLoader count={3} />
+          ) : (
+            <div className="grid gap-6">
+              {posts.map((post) => (
+                <Card key={post.id} className="bg-card/50 cyber-box hover:bg-card/70 transition-colors duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-orbitron text-primary flex justify-between items-center">
+                      <span>{post.title}</span>
+                      <span className={`text-sm px-3 py-1 rounded-full ${
+                        post.published 
+                          ? 'bg-green-500/20 text-green-500 border border-green-500/30' 
+                          : 'bg-yellow-500/20 text-yellow-500 border border-yellow-500/30'
+                      }`}>
+                        {post.published ? 'Published' : 'Draft'}
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-foreground/80 mb-2">
+                      <span className="font-semibold">Author:</span> {post.author}
+                    </p>
+                    <p className="text-sm text-foreground/80 mb-2">
+                      <span className="font-semibold">Category:</span> {post.category}
+                    </p>
+                    <p className="text-sm text-foreground/80 mb-4">
+                      {post.excerpt || post.content.substring(0, 200)}...
+                    </p>
+                    <div className="flex gap-4">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleEdit(post.id)}
+                        className="hover:bg-primary/20 transition-colors duration-300"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleDelete(post.id)}
+                        className="hover:bg-destructive/80 transition-colors duration-300"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+
+{/*       <Footer /> */}
     </div>
   );
 };

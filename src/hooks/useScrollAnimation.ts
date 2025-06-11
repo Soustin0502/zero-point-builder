@@ -1,14 +1,20 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-export const useScrollAnimation = <T extends HTMLElement = HTMLDivElement>(threshold = 0.1, rootMargin = '0px') => {
+export const useScrollAnimation = <T extends HTMLElement = HTMLDivElement>(threshold = 0.1, rootMargin = '0px', stayVisible = false) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [hasBeenVisible, setHasBeenVisible] = useState(false);
   const ref = useRef<T>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsVisible(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          setHasBeenVisible(true);
+        } else if (!stayVisible) {
+          setIsVisible(false);
+        }
       },
       {
         threshold,
@@ -23,7 +29,9 @@ export const useScrollAnimation = <T extends HTMLElement = HTMLDivElement>(thres
     return () => {
       observer.disconnect();
     };
-  }, [threshold, rootMargin]);
+  }, [threshold, rootMargin, stayVisible]);
 
-  return [ref, isVisible] as const;
+  // Return isVisible if stayVisible is false, otherwise return hasBeenVisible once it's been visible
+  const shouldShow = stayVisible ? hasBeenVisible : isVisible;
+  return [ref, shouldShow] as const;
 };

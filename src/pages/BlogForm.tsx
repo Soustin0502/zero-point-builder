@@ -13,7 +13,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Save, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+// import Footer from '@/components/Footer';
 
 const BlogForm = () => {
   const navigate = useNavigate();
@@ -230,7 +230,7 @@ const BlogForm = () => {
         </motion.div>
       </div>
 
-      <Footer />
+{/*       <Footer /> */}
     </div>
   );
 };

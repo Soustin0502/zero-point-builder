@@ -32,7 +32,7 @@ const SchoolSection = () => {
           >
             <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-6 relative">
               <span className="text-cyber relative z-10">About Our School</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110 w-100"></div>
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-8"></div>
           </div>

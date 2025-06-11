@@ -4,27 +4,26 @@ import { motion } from 'framer-motion';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { supabase } from '@/integrations/supabase/client';
-import { Calendar, User, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface Testimonial {
   id: string;
   created_at: string;
   name: string;
-  email: string;
   feedback: string;
-  position: string;
-  rating: number;
-  approved: boolean;
+  rating?: number;
+  position?: string;
 }
 
-const TestimonialsSection = () => {
+const FeedbacksSection = () => {
   const [sectionRef, sectionVisible] = useScrollAnimation(0.1, '0px', true);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Function to get initials from name
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -39,7 +38,7 @@ const TestimonialsSection = () => {
 
   const fetchTestimonials = async () => {
     try {
-      console.log('Fetching testimonials...');
+      console.log('Fetching testimonials for FeedbacksSection...');
       
       const { data, error } = await supabase
         .from('testimonials')
@@ -48,23 +47,37 @@ const TestimonialsSection = () => {
         .order('created_at', { ascending: false })
         .limit(3);
 
-      console.log('Supabase response:', { data, error });
+      console.log('Supabase response for feedbacks:', { data, error });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching testimonials:', error);
+        throw error;
+      }
       
       if (data) {
-        console.log('Testimonials fetched:', data);
+        console.log('Testimonials fetched for feedbacks section:', data);
         setTestimonials(data);
       } else {
         console.log('No testimonials data received');
         setTestimonials([]);
       }
     } catch (error) {
-      console.error('Error fetching testimonials:', error);
+      console.error('Error in fetchTestimonials:', error);
       setTestimonials([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <span
+        key={i}
+        className={i < rating ? 'text-yellow-400' : 'text-gray-300'}
+      >
+        ★
+      </span>
+    ));
   };
 
   return (
@@ -78,16 +91,16 @@ const TestimonialsSection = () => {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative">
-            <span className="text-cyber relative z-10">Testimonials</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
+            <span className="text-cyber relative z-10">Community Feedbacks</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110 opacity-100 pointer-events-none"></div>
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-6"></div>
           <p className="text-xl font-fira text-foreground/80 max-w-3xl mx-auto">
-            Hear from our valued members about their journey with us.
+            See what our community members have to say about their experiences.
           </p>
         </motion.div>
 
-        {/* Testimonials Grid */}
+        {/* Feedbacks Grid */}
         <div className="mb-12">
           {loading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -107,6 +120,12 @@ const TestimonialsSection = () => {
                   </div>
                 </Card>
               ))}
+            </div>
+          ) : testimonials.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-foreground/60 font-fira text-lg">
+                No feedbacks available yet. Be the first to share your experience!
+              </p>
             </div>
           ) : (
             <motion.div
@@ -129,21 +148,22 @@ const TestimonialsSection = () => {
                           {getInitials(testimonial.name)}
                         </AvatarFallback>
                       </Avatar>
-                      <div>
+                      <div className="flex-1">
                         <h4 className="font-orbitron text-primary">{testimonial.name}</h4>
-                        <p className="text-sm text-muted-foreground font-fira">
-                          {testimonial.position}
-                        </p>
-                        {/* Add star rating */}
-                        <div className="flex items-center mt-1">
-                          {[...Array(testimonial.rating)].map((_, i) => (
-                            <span key={i} className="text-yellow-500">★</span>
-                          ))}
-                        </div>
+                        {testimonial.position && (
+                          <p className="text-sm text-muted-foreground font-fira">
+                            {testimonial.position}
+                          </p>
+                        )}
+                        {testimonial.rating && (
+                          <div className="flex items-center mt-1">
+                            {renderStars(testimonial.rating)}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <p className="text-foreground/80 font-fira text-sm leading-relaxed">
-                      {testimonial.feedback}
+                      "{testimonial.feedback}"
                     </p>
                   </Card>
                 </motion.div>
@@ -157,9 +177,9 @@ const TestimonialsSection = () => {
           <Button 
             asChild 
             variant="ghost" 
-            className="bg-primary hover:bg-primary/80 text-primary-foreground font-fira"
+            className="text-primary font-orbitron hover:text-primary/80 hover:bg-primary/20 transition-colors"
           >
-            <Link to="/feedbacks">View All Testimonials <ArrowRight size={16} /></Link>
+            <Link to="/feedbacks">View All Feedbacks <ArrowRight size={16} /></Link>
           </Button>
         </div>
       </div>
@@ -167,4 +187,4 @@ const TestimonialsSection = () => {
   );
 };
 
-export default TestimonialsSection;
+export default FeedbacksSection;
