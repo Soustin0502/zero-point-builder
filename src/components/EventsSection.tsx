@@ -184,7 +184,7 @@ const EventsSection = () => {
                         WarP Inter '25: T.B.D.
                     </div>
                 </div>
-            </div>
+            </div><br/><br/>
             
             {/* Blog Section */}
             <div 
