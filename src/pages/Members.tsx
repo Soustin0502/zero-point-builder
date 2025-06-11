@@ -2,10 +2,11 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Github, Linkedin, Mail, ChevronDown, Users, Calendar } from 'lucide-react';
+import { Github, Linkedin, Mail, ChevronDown, Users, Calendar, Trophy } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import SkillsDisplay from '@/components/SkillsDisplay';
 import Navbar from '@/components/Navbar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 // import Footer from '@/components/Footer';
 
 const Members = () => {
@@ -13,6 +14,15 @@ const Members = () => {
   const [statsRef, statsVisible] = useScrollAnimation();
   const [membersHeaderRef, membersHeaderVisible] = useScrollAnimation();
   const [membersRef, membersVisible] = useScrollAnimation();
+  const [heroStatsRef, heroStatsVisible] = useScrollAnimation();
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase();
+  };
 
   const scrollToNextSection = () => {
     const aboutSection = document.querySelector('#members-stats');
@@ -129,7 +139,7 @@ const Members = () => {
         <div className="container mx-auto px-4 text-center z-10">
           <div 
             ref={titleRef}
-            className={`scroll-fade-in ${titleVisible ? 'animate' : ''}`}
+            className={`scroll-fade-in ${titleVisible ? 'animate' : ''} mb-8`}
           >
             <h1 className="text-4xl md:text-7xl font-orbitron font-bold mb-6 relative heading-glow">
               <span className="text-cyber relative z-10">Our Members</span>
@@ -137,6 +147,36 @@ const Members = () => {
             <p className="text-xl font-fira text-foreground/80 max-w-3xl mx-auto mb-8">
               Meet the brilliant minds driving innovation at WarP Computer Club
             </p>
+          </div>
+
+          {/* Hero Stats Cards */}
+          <div 
+            ref={heroStatsRef}
+            className={`grid md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-8 stagger-children ${heroStatsVisible ? 'animate' : ''}`}
+          >
+            <Card className="bg-card/30 cyber-border hover:border-primary/60 transition-all duration-300">
+              <CardHeader className="text-center pb-3">
+                <div className="flex items-center justify-center mb-2">
+                  <Users className="text-primary" size={32} />
+                </div>
+                <CardTitle className="text-2xl font-orbitron font-bold text-primary">
+                  {members.length}
+                </CardTitle>
+                <p className="text-muted-foreground font-fira text-sm">Active Members</p>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-card/30 cyber-border hover:border-secondary/60 transition-all duration-300">
+              <CardHeader className="text-center pb-3">
+                <div className="flex items-center justify-center mb-2">
+                  <Trophy className="text-secondary" size={32} />
+                </div>
+                <CardTitle className="text-2xl font-orbitron font-bold text-secondary">
+                  5+
+                </CardTitle>
+                <p className="text-muted-foreground font-fira text-sm">Years Legacy</p>
+              </CardHeader>
+            </Card>
           </div>
         </div>
 
@@ -216,11 +256,14 @@ const Members = () => {
                 }}
               >
                 <div className="relative">
-                  <img 
-                    src={member.image} 
-                    alt={member.name}
-                    className="w-full h-48 object-cover transition-all duration-300 member-image"
-                  />
+                  <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
+                    <Avatar className="w-32 h-32">
+                      <AvatarImage src={member.image} alt={member.name} className="object-cover" />
+                      <AvatarFallback className="bg-primary/20 text-primary font-bold text-xl">
+                        {getInitials(member.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
                   <div className="absolute bottom-0 left-0 right-0 h-24 member-fade"></div>
                 </div>
                 

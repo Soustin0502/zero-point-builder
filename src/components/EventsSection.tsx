@@ -201,36 +201,38 @@ const EventsSection = () => {
                     </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto justify-center">
-                {blogPosts.map((post, index) => (
-                    <Card key={post.id} className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 w-full max-w-md mx-auto">
-                        <CardHeader className="pb-3">
-                            <div className={`inline-block px-2 py-1 rounded-full text-xs font-fira uppercase tracking-wider mb-2 border ${getCategoryColor(post.category)}`}>
-                                {post.category}
-                            </div>
-                            <CardTitle className="text-lg font-orbitron text-primary line-clamp-2">
-                                {post.title}
-                            </CardTitle>
-                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                    <User size={12} />
-                                    <span className="font-fira">{post.author}</span>
+            <div className="flex justify-center">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full justify-items-center">
+                    {blogPosts.map((post, index) => (
+                        <Card key={post.id} className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 w-full max-w-md">
+                            <CardHeader className="pb-3 text-center">
+                                <div className={`inline-block px-2 py-1 rounded-full text-xs font-fira uppercase tracking-wider mb-2 border ${getCategoryColor(post.category)}`}>
+                                    {post.category}
                                 </div>
-                                <div className="flex items-center gap-1">
-                                    <Calendar size={12} />
-                                    <span className="font-fira">
-                                        {new Date(post.created_at).toLocaleDateString()}
-                                    </span>
+                                <CardTitle className="text-lg font-orbitron text-primary line-clamp-2">
+                                    {post.title}
+                                </CardTitle>
+                                <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground">
+                                    <div className="flex items-center gap-1">
+                                        <User size={12} />
+                                        <span className="font-fira">{post.author}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Calendar size={12} />
+                                        <span className="font-fira">
+                                            {new Date(post.created_at).toLocaleDateString()}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                            <p className="text-foreground/70 font-fira text-sm line-clamp-4 mb-4">
-                                {post.excerpt}
-                            </p>
-                        </CardContent>
-                    </Card>
-                ))}
+                            </CardHeader>
+                            <CardContent className="pt-0 text-center">
+                                <p className="text-foreground/70 font-fira text-sm line-clamp-4 mb-4 text-justify">
+                                    {post.excerpt}
+                                </p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
             </div>
 
             <div className="text-center mt-8">

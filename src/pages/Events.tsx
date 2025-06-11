@@ -1,8 +1,9 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users, Clock, ChevronDown, Trophy } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, ChevronDown, Trophy, Target } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import SkillsDisplay from '@/components/SkillsDisplay';
 import Navbar from '@/components/Navbar';
@@ -12,6 +13,7 @@ const Events = () => {
   const [titleRef, titleVisible] = useScrollAnimation();
   const [statsRef, statsVisible] = useScrollAnimation();
   const [eventsRef, eventsVisible] = useScrollAnimation();
+  const [heroStatsRef, heroStatsVisible] = useScrollAnimation();
 
   const scrollToNextSection = () => {
     const eventsSection = document.querySelector('#events-stats');
@@ -119,7 +121,7 @@ const Events = () => {
         <div className="container mx-auto px-4 text-center z-10">
           <div 
             ref={titleRef}
-            className={`scroll-fade-in ${titleVisible ? 'animate' : ''}`}
+            className={`scroll-fade-in ${titleVisible ? 'animate' : ''} mb-8`}
           >
             <h1 className="text-4xl md:text-7xl font-orbitron font-bold mb-6 relative">
               <span className="text-cyber relative z-10">Our Events</span>
@@ -128,6 +130,36 @@ const Events = () => {
             <p className="text-xl font-fira text-foreground/80 max-w-3xl mx-auto mb-8">
               Discover amazing opportunities to learn, compete, and innovate with fellow tech enthusiasts
             </p>
+          </div>
+
+          {/* Hero Stats Cards */}
+          <div 
+            ref={heroStatsRef}
+            className={`grid md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-8 stagger-children ${heroStatsVisible ? 'animate' : ''}`}
+          >
+            <Card className="bg-card/30 cyber-border hover:border-primary/60 transition-all duration-300">
+              <CardHeader className="text-center pb-3">
+                <div className="flex items-center justify-center mb-2">
+                  <Target className="text-primary" size={32} />
+                </div>
+                <CardTitle className="text-2xl font-orbitron font-bold text-primary">
+                  {upcomingEvents.length}
+                </CardTitle>
+                <p className="text-muted-foreground font-fira text-sm">Upcoming Events</p>
+              </CardHeader>
+            </Card>
+
+            <Card className="bg-card/30 cyber-border hover:border-secondary/60 transition-all duration-300">
+              <CardHeader className="text-center pb-3">
+                <div className="flex items-center justify-center mb-2">
+                  <Trophy className="text-secondary" size={32} />
+                </div>
+                <CardTitle className="text-2xl font-orbitron font-bold text-secondary">
+                  370+
+                </CardTitle>
+                <p className="text-muted-foreground font-fira text-sm">Total Participants</p>
+              </CardHeader>
+            </Card>
           </div>
         </div>
 
@@ -170,7 +202,7 @@ const Events = () => {
                   <Trophy className="text-secondary" size={48} />
                 </div>
                 <CardTitle className="text-3xl font-orbitron font-bold text-secondary">
-                  {pastEvents.length}
+                  5
                 </CardTitle>
                 <p className="text-muted-foreground font-fira">Successful Events</p>
               </CardHeader>

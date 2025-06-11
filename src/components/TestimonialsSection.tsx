@@ -5,7 +5,7 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 
@@ -77,7 +77,7 @@ const TestimonialsSection = () => {
           animate={sectionVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative">
+          <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative inline-block">
             <span className="text-cyber relative z-10">Feedbacks</span>
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
           </h2>
