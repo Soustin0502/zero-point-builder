@@ -185,6 +185,8 @@ const EventsSection = () => {
             </div>
           </div>
         </div>
+      </div>
+    </section>
   );
 };
 

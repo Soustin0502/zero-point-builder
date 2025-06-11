@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -83,7 +82,7 @@ const TestimonialsSection = () => {
           transition={{ duration: 0.6 }}
         >
           {loading ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full justify-items-center">
               {[...Array(3)].map((_, i) => (
                 <Card key={i} className="bg-card/50 cyber-border animate-pulse">
                   <CardHeader>
@@ -102,7 +101,7 @@ const TestimonialsSection = () => {
             </div>
           ) : (
             <motion.div
-              className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full"
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full justify-items-center"
               variants={{
                 hidden: { opacity: 0 },
                 visible: {
@@ -123,6 +122,7 @@ const TestimonialsSection = () => {
                     visible: { opacity: 1, y: 0 }
                   }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="w-full max-w-sm"
                 >
                   <Card className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 h-full">
                     <CardHeader className="text-center">
