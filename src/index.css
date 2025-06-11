@@ -133,7 +133,7 @@
     transition: background-image 0.3s ease;
   }
 
-  /* Fixed glow effect behind headings - prevents disappearing on scroll */
+  /* Enhanced glow effect behind headings - full width coverage */
   .heading-glow {
     position: relative;
   }
@@ -141,12 +141,13 @@
   .heading-glow::before {
     content: '';
     position: absolute;
-    inset: 0;
-    background: linear-gradient(to right, hsl(var(--primary) / 0.2), hsl(var(--secondary) / 0.2), hsl(var(--accent) / 0.2));
-    border-radius: inherit;
-    filter: blur(20px);
+    left: -100vw;
+    right: -100vw;
+    top: -20px;
+    bottom: -20px;
+    background: linear-gradient(to right, transparent, hsl(var(--primary) / 0.15), hsl(var(--secondary) / 0.15), hsl(var(--accent) / 0.15), transparent);
+    filter: blur(30px);
     z-index: -1;
-    scale: 1.1;
     opacity: 1;
     pointer-events: none;
   }
@@ -274,11 +275,17 @@
     z-index: 2;
   }
 
-  /* Member card hover effect - no glow effect for members */
+  /* Member card hover effect with animations */
   .member-card {
     height: 450px;
     position: relative;
     overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .member-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   }
 
   /* Smooth scroll for all pages */
@@ -289,6 +296,7 @@
   /* Member card styles - updated with better fade and positioning */
   .member-image {
     filter: grayscale(100%);
+    transition: filter 0.3s ease;
   }
 
   .member-card:hover .member-image {
@@ -371,6 +379,8 @@
   .stagger-children.animate > *:nth-child(4) { transition-delay: 0.7s; }
   .stagger-children.animate > *:nth-child(5) { transition-delay: 0.9s; }
   .stagger-children.animate > *:nth-child(6) { transition-delay: 1.1s; }
+  .stagger-children.animate > *:nth-child(7) { transition-delay: 1.3s; }
+  .stagger-children.animate > *:nth-child(8) { transition-delay: 1.5s; }
 
   .stagger-children.animate > * {
     opacity: 1;

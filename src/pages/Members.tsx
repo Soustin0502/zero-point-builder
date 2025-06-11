@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +11,7 @@ import Navbar from '@/components/Navbar';
 const Members = () => {
   const [titleRef, titleVisible] = useScrollAnimation();
   const [statsRef, statsVisible] = useScrollAnimation();
+  const [membersHeaderRef, membersHeaderVisible] = useScrollAnimation();
   const [membersRef, membersVisible] = useScrollAnimation();
 
   const scrollToNextSection = () => {
@@ -129,9 +131,8 @@ const Members = () => {
             ref={titleRef}
             className={`scroll-fade-in ${titleVisible ? 'animate' : ''}`}
           >
-            <h1 className="text-4xl md:text-7xl font-orbitron font-bold mb-6 relative">
+            <h1 className="text-4xl md:text-7xl font-orbitron font-bold mb-6 relative heading-glow">
               <span className="text-cyber relative z-10">Our Members</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110 opacity-100"></div>
             </h1>
             <p className="text-xl font-fira text-foreground/80 max-w-3xl mx-auto mb-8">
               Meet the brilliant minds driving innovation at WarP Computer Club
@@ -190,23 +191,37 @@ const Members = () => {
             </Card>
           </div>
 
+          {/* Members Header */}
+          <div 
+            ref={membersHeaderRef}
+            className={`text-center mb-16 scroll-fade-in ${membersHeaderVisible ? 'animate' : ''}`}
+          >
+            <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-6 relative heading-glow">
+              <span className="text-cyber relative z-10">Meet the Core Members</span>
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-8"></div>
+          </div>
+
           {/* Members Grid */}
           <div 
             ref={membersRef}
             className={`grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 stagger-children ${membersVisible ? 'animate' : ''}`}
           >
-            {members.map((member) => (
+            {members.map((member, index) => (
               <Card 
                 key={member.id} 
-                className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 overflow-hidden"
+                className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 overflow-hidden transform hover:scale-105 member-card"
+                style={{
+                  animationDelay: `${index * 0.1}s`
+                }}
               >
                 <div className="relative">
                   <img 
                     src={member.image} 
                     alt={member.name}
-                    className="w-full h-48 object-cover transition-all duration-300"
+                    className="w-full h-48 object-cover transition-all duration-300 member-image"
                   />
-                  <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-card to-transparent"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-24 member-fade"></div>
                 </div>
                 
                 <CardContent className="p-6 relative">
