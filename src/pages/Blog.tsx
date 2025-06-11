@@ -243,5 +243,3 @@ const Blog = () => {
 };
 
 export default Blog;
-
-</edits_to_apply>
