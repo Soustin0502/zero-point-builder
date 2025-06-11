@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -71,7 +72,7 @@ const Blog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       {/* Hero Section */}
@@ -112,28 +113,27 @@ const Blog = () => {
             animate={headingVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative">
+            <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative heading-glow">
               <span className="text-cyber relative z-10">Latest Posts</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-4"></div>
           </motion.div>
 
           {/* Blog Posts Grid */}
           <motion.div 
-            className="relative z-10"
+            className="relative z-10 flex justify-center"
             ref={blogRef}
             initial={{ opacity: 0, y: 20 }}
             animate={blogVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.6 }}
           >
             {loading ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full">
                 {[...Array(6)].map((_, i) => (
                   <Card key={i} className="bg-card/50 cyber-border animate-pulse">
                     <CardHeader>
-                      <div className="h-6 bg-muted rounded w-3/4"></div>
-                      <div className="h-4 bg-muted rounded w-1/2"></div>
+                      <div className="h-6 bg-muted rounded w-3/4 mx-auto"></div>
+                      <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
@@ -147,7 +147,7 @@ const Blog = () => {
               </div>
             ) : (
               <motion.div
-                className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+                className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full"
                 variants={{
                   hidden: { opacity: 0 },
                   visible: {
@@ -170,11 +170,11 @@ const Blog = () => {
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
                     <Card className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 h-full">
-                      <CardHeader>
+                      <CardHeader className="text-center">
                         <CardTitle className="text-lg font-orbitron text-primary">
                           {post.title}
                         </CardTitle>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
                           <Calendar size={14} />
                           <span className="font-fira">
                             {new Date(post.created_at).toLocaleDateString()}
@@ -182,15 +182,15 @@ const Blog = () => {
                         </div>
                       </CardHeader>
 
-                      <CardContent className="flex flex-col gap-4">
-                        <p className="text-foreground/80 font-fira text-sm leading-relaxed">
+                      <CardContent className="flex flex-col gap-4 text-center">
+                        <p className="text-foreground/80 font-fira text-sm leading-relaxed text-justify">
                           {expandedPosts.has(post.id) ? post.content : post.excerpt}
                         </p>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => toggleExpand(post.id)}
-                          className="self-start"
+                          className="self-center"
                         >
                           {expandedPosts.has(post.id) ? (
                             <>
@@ -204,7 +204,7 @@ const Blog = () => {
                             </>
                           )}
                         </Button>
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center justify-center gap-2 mt-2">
                           <User size={16} className="text-muted-foreground" />
                           <span className="text-muted-foreground font-fira text-sm">
                             {post.author}
@@ -216,7 +216,7 @@ const Blog = () => {
                             variant="link"
                             size="sm"
                             asChild
-                            className="justify-start"
+                            className="justify-center"
                           >
                             <a
                               href={post.instagram_post_url}
