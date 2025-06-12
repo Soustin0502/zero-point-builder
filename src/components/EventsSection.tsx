@@ -8,6 +8,7 @@ import { Calendar, User, ArrowRight } from 'lucide-react';
 import { gsap } from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { useGSAPScrollTrigger } from '@/hooks/useGSAPAnimation';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 gsap.registerPlugin(TextPlugin);
 
@@ -34,39 +35,8 @@ const EventsSection = () => {
     );
   }, { start: "top 80%" });
 
-  // Events cards with morphing and floating effects
-  const eventsRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
-    const cards = element.querySelectorAll('.event-card');
-    
-    gsap.fromTo(cards,
-      {
-        opacity: 0,
-        y: 100,
-        rotationY: 30,
-        scale: 0.8
-      },
-      {
-        opacity: 1,
-        y: 0,
-        rotationY: 0,
-        scale: 1,
-        duration: 0.8,
-        stagger: 0.3,
-        ease: "back.out(1.7)"
-      }
-    );
-
-    // Add floating animation
-    cards.forEach((card, index) => {
-      gsap.to(card, {
-        y: "+=10",
-        duration: 2 + index * 0.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "power1.inOut"
-      });
-    });
-  }, { start: "top 70%" });
+  // Events cards with simple scroll animation
+  const [eventsRef, eventsVisible] = useScrollAnimation();
 
   // Terminal typing animation for events schedule
   const terminalRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
@@ -143,39 +113,8 @@ const EventsSection = () => {
     );
   }, { start: "top 75%" });
 
-  // Blog terminal animation
-  const blogTerminalRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
-    const commandElement = element.querySelector('.blog-terminal-command');
-    const infoElements = element.querySelectorAll('.blog-terminal-info');
-    
-    // Initial setup
-    gsap.set(element, { opacity: 0, x: -100 });
-    gsap.set(commandElement, { text: "" });
-    gsap.set(infoElements, { opacity: 0 });
-    
-    const tl = gsap.timeline();
-    
-    // Slide in terminal
-    tl.to(element, {
-      opacity: 1,
-      x: 0,
-      duration: 0.6,
-      ease: "power2.out"
-    })
-    // Type command
-    .to(commandElement, {
-      text: "$ blog --latest",
-      duration: 1.5,
-      ease: "none"
-    })
-    // Show info with stagger
-    .to(infoElements, {
-      opacity: 1,
-      duration: 0.3,
-      stagger: 0.2,
-      ease: "power2.out"
-    }, "+=0.5");
-  }, { start: "top 80%" });
+  // Blog terminal animation - simple scroll in
+  const [blogTerminalRef, blogTerminalVisible] = useScrollAnimation();
 
   useEffect(() => {
     fetchLatestBlogPosts();
@@ -283,7 +222,7 @@ const EventsSection = () => {
 
             <div 
             ref={eventsRef}
-            className="relative max-w-6xl mx-auto events-container items-center"
+            className={`relative max-w-6xl mx-auto events-container items-center scroll-fade-in ${eventsVisible ? 'animate' : ''}`}
             >
                 {events.map((event, index) => (
                     <Card 
@@ -296,10 +235,6 @@ const EventsSection = () => {
                     `}
                     onMouseMove={(e) => handleCardMouseMove(e, index)}
                     onMouseLeave={handleCardMouseLeave}
-                    style={{
-                        '--mouse-x': hoveredCard === index ? `${mousePosition.x}px` : '50%',
-                        '--mouse-y': hoveredCard === index ? `${mousePosition.y}px` : '50%',
-                    } as React.CSSProperties}
                     >
                         <CardHeader>
                             <div className={`inline-block px-3 py-1 rounded-full text-xs font-fira uppercase tracking-wider mb-2 ${
@@ -382,7 +317,7 @@ const EventsSection = () => {
             <div className="flex justify-center">
                 <div ref={postsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full justify-items-center items-center">
                     {blogPosts.length > 0 ? blogPosts.map((post, index) => (
-                        <Card key={post.id} className="blog-card bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 w-full max-w-md card-glossy-glow">
+                        <Card key={post.id} className="blog-card bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 w-full max-w-md">
                             <CardHeader className="pb-3 text-center">
                                 <div className={`inline-block px-2 py-1 rounded-full text-xs font-fira uppercase tracking-wider mb-2 border ${getCategoryColor(post.category)}`}>
                                     {post.category}
@@ -422,14 +357,13 @@ const EventsSection = () => {
             {/* Blog Terminal Info */}
             <div 
             ref={blogTerminalRef}
-            className="text-center mt-8"
+            className={`text-center mt-8 scroll-fade-in ${blogTerminalVisible ? 'animate' : ''}`}
             >
                 <div className="terminal-text bg-background/50 border border-primary/30 rounded-lg p-4 max-w-md mx-auto">
-                    <div className="blog-terminal-command text-primary mb-2"></div>
+                    <div className="text-primary mb-2 font-mono">$ blog --latest</div>
                     <div className="text-muted-foreground text-sm">
-                        <div className="blog-terminal-info">Total Posts: {blogPosts.length}</div>
-                        <div className="blog-terminal-info">Categories: Tech, Events, Announcements</div>
-                        <div className="blog-terminal-info">Status: ✓ Regularly Updated</div>
+                        <div>Total Posts: {blogPosts.length}</div>
+                        <div>Status: ✓ Regularly Updated</div>
                     </div>
                 </div>
             </div>
