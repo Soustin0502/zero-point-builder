@@ -222,28 +222,18 @@ const EventsSection = () => {
 
             <div 
             ref={eventsRef}
-            className={`relative max-w-6xl mx-auto mb-16 scroll-fade-in ${eventsVisible ? 'animate' : ''}`}
-            style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '2rem',
-                '@media (max-width: 768px)': {
-                    gridTemplateColumns: '1fr'
-                }
-            }}
+            className={`relative max-w-6xl mx-auto mb-16 scroll-fade-in ${eventsVisible ? 'animate' : ''} grid grid-cols-1 md:grid-cols-2 gap-8`}
             >
                 {events.map((event, index) => (
                     <Card 
                     key={index} 
                     className={`
                         bg-card cyber-border transition-all duration-300 group min-h-[400px] flex flex-col
-                        ${index === 0 ? 'rotate-[-30deg] origin-center z-10' : 'rotate-[30deg] origin-center z-20'}
+                        ${index === 0 ? '-rotate-[30deg] origin-center z-10' : 'rotate-[30deg] origin-center z-20'}
                         ${hoveredCard === index ? 'z-30' : ''}
                     `}
                     style={{
                         backgroundColor: 'hsl(var(--card))',
-                        transform: index === 0 ? 'rotate(-30deg)' : 'rotate(30deg)',
-                        transformOrigin: 'center',
                         zIndex: hoveredCard === index ? 30 : (index === 0 ? 10 : 20)
                     }}
                     onMouseMove={(e) => handleCardMouseMove(e, index)}
