@@ -113,8 +113,21 @@ const EventsSection = () => {
     );
   }, { start: "top 75%" });
 
-  // Blog terminal animation - simple scroll in
-  const [blogTerminalRef, blogTerminalVisible] = useScrollAnimation();
+  // Feedbacks terminal animation - subtle scroll in
+  const feedbacksTerminalRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
+    gsap.fromTo(element,
+      {
+        opacity: 0,
+        y: 30
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power2.out"
+      }
+    );
+  }, { start: "top 80%" });
 
   useEffect(() => {
     fetchLatestBlogPosts();
@@ -144,10 +157,8 @@ const EventsSection = () => {
     });
     setHoveredCard(index);
 
-    // Reduced morphing effect
+    // Only scale effect, no rotation
     gsap.to(e.currentTarget, {
-      rotationY: 2,
-      rotationX: 1,
       scale: 1.02,
       z: 100,
       duration: 0.3,
@@ -159,8 +170,6 @@ const EventsSection = () => {
     setHoveredCard(null);
     
     gsap.to(e.currentTarget, {
-      rotationY: 0,
-      rotationX: 0,
       scale: 1,
       z: 0,
       duration: 0.5,
@@ -222,14 +231,14 @@ const EventsSection = () => {
 
             <div 
             ref={eventsRef}
-            className={`relative max-w-6xl mx-auto mb-16 scroll-fade-in ${eventsVisible ? 'animate' : ''} grid grid-cols-1 md:grid-cols-2 gap-8`}
+            className={`relative max-w-5xl mx-auto mb-16 scroll-fade-in ${eventsVisible ? 'animate' : ''} flex justify-center items-center gap-4`}
             >
                 {events.map((event, index) => (
                     <Card 
                     key={index} 
                     className={`
-                        bg-card cyber-border transition-all duration-300 group min-h-[400px] flex flex-col
-                        ${index === 0 ? '-rotate-[30deg] origin-center z-10' : 'rotate-[30deg] origin-center z-20'}
+                        bg-card cyber-border transition-all duration-300 group min-h-[400px] flex flex-col w-80
+                        ${index === 0 ? '-rotate-3 origin-center z-10 -mr-8' : 'rotate-3 origin-center z-20'}
                         ${hoveredCard === index ? 'z-30' : ''}
                     `}
                     style={{
@@ -359,8 +368,8 @@ const EventsSection = () => {
 
             {/* Blog Terminal Info */}
             <div 
-            ref={blogTerminalRef}
-            className={`text-center mt-8 scroll-fade-in ${blogTerminalVisible ? 'animate' : ''}`}
+            ref={feedbacksTerminalRef}
+            className="text-center mt-8"
             >
                 <div className="terminal-text bg-background/50 border border-primary/30 rounded-lg p-4 max-w-md mx-auto">
                     <div className="text-primary mb-2 font-mono">$ blog --latest</div>
