@@ -2,19 +2,180 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Calendar, User, ArrowRight } from 'lucide-react';
+import { gsap } from 'gsap';
+import { TextPlugin } from 'gsap/TextPlugin';
+import { useGSAPScrollTrigger } from '@/hooks/useGSAPAnimation';
+
+gsap.registerPlugin(TextPlugin);
 
 const EventsSection = () => {
-  const [titleRef, titleVisible] = useScrollAnimation();
-  const [eventsRef, eventsVisible] = useScrollAnimation();
-  const [terminalRef, terminalVisible] = useScrollAnimation();
-  const [blogRef, blogVisible] = useScrollAnimation();
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
+
+  // Title animation
+  const titleRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
+    gsap.fromTo(element,
+      {
+        opacity: 0,
+        y: 60,
+        scale: 0.8
+      },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 1.2,
+        ease: "power3.out"
+      }
+    );
+  }, { start: "top 80%" });
+
+  // Events cards with morphing and floating effects
+  const eventsRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
+    const cards = element.querySelectorAll('.event-card');
+    
+    gsap.fromTo(cards,
+      {
+        opacity: 0,
+        y: 100,
+        rotationY: 30,
+        scale: 0.8
+      },
+      {
+        opacity: 1,
+        y: 0,
+        rotationY: 0,
+        scale: 1,
+        duration: 0.8,
+        stagger: 0.3,
+        ease: "back.out(1.7)"
+      }
+    );
+
+    // Add floating animation
+    cards.forEach((card, index) => {
+      gsap.to(card, {
+        y: "+=10",
+        duration: 2 + index * 0.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "power1.inOut"
+      });
+    });
+  }, { start: "top 70%" });
+
+  // Terminal typing animation for events schedule
+  const terminalRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
+    const commandElement = element.querySelector('.terminal-command');
+    const infoElements = element.querySelectorAll('.terminal-info');
+    
+    // Initial setup
+    gsap.set(element, { opacity: 0, x: 100 });
+    gsap.set(commandElement, { text: "" });
+    gsap.set(infoElements, { opacity: 0 });
+    
+    const tl = gsap.timeline();
+    
+    // Slide in terminal
+    tl.to(element, {
+      opacity: 1,
+      x: 0,
+      duration: 0.6,
+      ease: "power2.out"
+    })
+    // Type command
+    .to(commandElement, {
+      text: "$ events --schedule",
+      duration: 1.5,
+      ease: "none"
+    })
+    // Show info with stagger
+    .to(infoElements, {
+      opacity: 1,
+      duration: 0.3,
+      stagger: 0.2,
+      ease: "power2.out"
+    }, "+=0.5");
+  }, { start: "top 80%" });
+
+  // Blog section animation
+  const blogRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
+    gsap.fromTo(element,
+      {
+        opacity: 0,
+        y: 60,
+        scale: 0.9
+      },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 1,
+        ease: "power3.out"
+      }
+    );
+  }, { start: "top 80%" });
+
+  // Latest Posts animation
+  const postsRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
+    const cards = element.querySelectorAll('.blog-card');
+    
+    gsap.fromTo(cards,
+      {
+        opacity: 0,
+        y: 80,
+        rotationX: 45,
+        scale: 0.8
+      },
+      {
+        opacity: 1,
+        y: 0,
+        rotationX: 0,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.2,
+        ease: "back.out(1.7)"
+      }
+    );
+  }, { start: "top 75%" });
+
+  // Blog terminal animation
+  const blogTerminalRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
+    const commandElement = element.querySelector('.blog-terminal-command');
+    const infoElements = element.querySelectorAll('.blog-terminal-info');
+    
+    // Initial setup
+    gsap.set(element, { opacity: 0, x: -100 });
+    gsap.set(commandElement, { text: "" });
+    gsap.set(infoElements, { opacity: 0 });
+    
+    const tl = gsap.timeline();
+    
+    // Slide in terminal
+    tl.to(element, {
+      opacity: 1,
+      x: 0,
+      duration: 0.6,
+      ease: "power2.out"
+    })
+    // Type command
+    .to(commandElement, {
+      text: "$ blog --latest",
+      duration: 1.5,
+      ease: "none"
+    })
+    // Show info with stagger
+    .to(infoElements, {
+      opacity: 1,
+      duration: 0.3,
+      stagger: 0.2,
+      ease: "power2.out"
+    }, "+=0.5");
+  }, { start: "top 80%" });
 
   useEffect(() => {
     fetchLatestBlogPosts();
@@ -43,10 +204,29 @@ const EventsSection = () => {
       y: e.clientY - rect.top
     });
     setHoveredCard(index);
+
+    // Enhanced morphing effect
+    gsap.to(e.currentTarget, {
+      rotationY: 8,
+      rotationX: 4,
+      scale: 1.05,
+      z: 100,
+      duration: 0.3,
+      ease: "power2.out"
+    });
   };
 
-  const handleCardMouseLeave = () => {
+  const handleCardMouseLeave = (e: React.MouseEvent) => {
     setHoveredCard(null);
+    
+    gsap.to(e.currentTarget, {
+      rotationY: 0,
+      rotationX: 0,
+      scale: 1,
+      z: 0,
+      duration: 0.5,
+      ease: "elastic.out(1, 0.3)"
+    });
   };
 
   const events = [
@@ -86,15 +266,14 @@ const EventsSection = () => {
   };
 
   return (
-    <section id="events" className="py-20 bg-card/20">
+    <section id="events" className="py-20 bg-transparent">
         <div className="container mx-auto px-4">
             <div 
             ref={titleRef}
-            className={`text-center mb-16 scroll-fade-in ${titleVisible ? 'animate' : ''}`}
+            className="text-center mb-16"
             >
-                <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative">
+                <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative title-glow">
                     <span className="text-cyber relative z-10">Our Events</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110 opacity-100 pointer-events-none"></div>
                 </h2>
                 <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-6"></div>
                 <p className="text-lg font-fira text-muted-foreground max-w-2xl mx-auto">
@@ -104,13 +283,13 @@ const EventsSection = () => {
 
             <div 
             ref={eventsRef}
-            className={`relative max-w-6xl mx-auto events-container ${eventsVisible ? 'animate' : ''}`}
+            className="relative max-w-6xl mx-auto events-container items-center"
             >
                 {events.map((event, index) => (
                     <Card 
                     key={index} 
                     className={`
-                        bg-card cyber-border transition-all duration-300 group event-card
+                        event-card bg-card cyber-border transition-all duration-300 group
                         ${index === 0 ? 'event-card-1' : 'event-card-2'}
                         ${hoveredCard === index ? 'z-20' : ''}
                         ${hoveredCard !== null && hoveredCard !== index ? 'adjacent-glow' : ''}
@@ -175,25 +354,24 @@ const EventsSection = () => {
 
             <div 
             ref={terminalRef}
-            className={`text-center mt-12 scroll-fade-in ${terminalVisible ? 'animate' : ''}`}
+            className="text-center mt-12"
             >
                 <div className="terminal-text bg-background/50 border border-accent/30 rounded-lg p-4 max-w-md mx-auto">
-                    <div className="text-accent mb-1">$ events --schedule</div>
+                    <div className="terminal-command text-accent mb-1"></div>
                     <div className="text-muted-foreground text-sm">
-                        WarP Intra '25: August 02, 2025<br/>
-                        WarP Inter '25: T.B.D.
+                        <div className="terminal-info">WarP Intra '25: August 02, 2025</div>
+                        <div className="terminal-info">WarP Inter '25: T.B.D.</div>
                     </div>
                 </div>
             </div><br/><br/><br/><br/><br/>
             
-            {/* Blog Section */}
+            {/* Latest Posts Section */}
             <div 
             ref={blogRef}
-            className={`text-center mb-16 scroll-fade-in ${blogVisible ? 'animate' : ''}`}
+            className="text-center mb-16"
             >
-                <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative">
-                    <span className="text-cyber relative z-10">Latest from Our Blogs</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110 opacity-100 pointer-events-none"></div>
+                <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative title-glow">
+                    <span className="text-cyber relative z-10">Latest Posts</span>
                 </h2>
                 <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-6"></div>
                     <p className="text-lg font-fira text-muted-foreground max-w-2xl mx-auto">
@@ -202,9 +380,9 @@ const EventsSection = () => {
             </div>
 
             <div className="flex justify-center">
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full justify-items-center">
-                    {blogPosts.map((post, index) => (
-                        <Card key={post.id} className="bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 w-full max-w-md">
+                <div ref={postsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full justify-items-center items-center">
+                    {blogPosts.length > 0 ? blogPosts.map((post, index) => (
+                        <Card key={post.id} className="blog-card bg-card/50 cyber-border hover:border-primary/60 transition-all duration-300 w-full max-w-md card-glossy-glow">
                             <CardHeader className="pb-3 text-center">
                                 <div className={`inline-block px-2 py-1 rounded-full text-xs font-fira uppercase tracking-wider mb-2 border ${getCategoryColor(post.category)}`}>
                                     {post.category}
@@ -231,7 +409,28 @@ const EventsSection = () => {
                                 </p>
                             </CardContent>
                         </Card>
-                    ))}
+                    )) : (
+                        <div className="col-span-full text-center py-12">
+                            <p className="text-foreground/60 font-fira text-lg">
+                                No posts available yet. Check back soon!
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Blog Terminal Info */}
+            <div 
+            ref={blogTerminalRef}
+            className="text-center mt-8"
+            >
+                <div className="terminal-text bg-background/50 border border-primary/30 rounded-lg p-4 max-w-md mx-auto">
+                    <div className="blog-terminal-command text-primary mb-2"></div>
+                    <div className="text-muted-foreground text-sm">
+                        <div className="blog-terminal-info">Total Posts: {blogPosts.length}</div>
+                        <div className="blog-terminal-info">Categories: Tech, Events, Announcements</div>
+                        <div className="blog-terminal-info">Status: ✓ Regularly Updated</div>
+                    </div>
                 </div>
             </div>
 

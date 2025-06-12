@@ -1,4 +1,4 @@
-# Welcome to our WarP project 
+# Welcome to our WarP project
 
 ## Project info
 

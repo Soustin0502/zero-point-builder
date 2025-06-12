@@ -53,6 +53,7 @@ export type Database = {
       }
       events: {
         Row: {
+          brochure_link: string | null
           created_at: string
           current_participants: number | null
           description: string
@@ -71,6 +72,7 @@ export type Database = {
           winners: Json | null
         }
         Insert: {
+          brochure_link?: string | null
           created_at?: string
           current_participants?: number | null
           description: string
@@ -89,6 +91,7 @@ export type Database = {
           winners?: Json | null
         }
         Update: {
+          brochure_link?: string | null
           created_at?: string
           current_participants?: number | null
           description?: string

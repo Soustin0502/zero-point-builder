@@ -8,10 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Star, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { motion } from 'framer-motion';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 const FeedbackForm = () => {
   const { toast } = useToast();
+  const [formRef, formVisible] = useScrollAnimation();
   const [loading, setLoading] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
@@ -80,14 +81,11 @@ const FeedbackForm = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: 0.2 }}
-      className="max-w-2xl mx-auto"
+    <div
+      ref={formRef}
+      className={`max-w-2xl mx-auto scroll-scale-up ${formVisible ? 'animate' : ''}`}
     >
-      <Card className="bg-card/50 cyber-border">
+      <Card className="bg-card/50 cyber-border card-glossy-glow">
         <CardHeader>
           <CardTitle className="text-2xl font-orbitron text-primary text-center">
             Feedback Form
@@ -122,12 +120,12 @@ const FeedbackForm = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="position" className="font-fira">Position/Class</Label>
+              <Label htmlFor="position" className="font-fira">Position/Class/Role</Label>
               <Input
                 id="position"
                 value={formData.position}
                 onChange={(e) => handleInputChange('position', e.target.value)}
-                placeholder="e.g., Class 12 Student, Alumni, etc."
+                placeholder="e.g., Class 12 Student, Alumni, Teacher, etc."
                 className="font-fira"
               />
             </div>
@@ -180,7 +178,7 @@ const FeedbackForm = () => {
           </form>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 };
 

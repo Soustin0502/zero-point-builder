@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, User, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Calendar, User, Plus, ArrowRight, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -24,7 +25,7 @@ interface BlogPost {
 }
 
 const Blog = () => {
-  const [titleRef, titleVisible] = useScrollAnimation();
+  const [titleRef, titleVisible] = useScrollAnimation(0.2);
   const [headingRef, headingVisible] = useScrollAnimation(0.2);
   const [blogRef, blogVisible] = useScrollAnimation(0.3);
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -42,7 +43,7 @@ const Blog = () => {
         .select('*')
         .eq('published', true)
         .order('created_at', { ascending: false });
-
+  
       if (error) throw error;
       setPosts(data || []);
     } catch (error) {
@@ -51,7 +52,7 @@ const Blog = () => {
       setLoading(false);
     }
   };
-
+  
   const toggleExpand = (postId: string) => {
     setExpandedPosts((prevExpandedPosts) => {
       const newExpandedPosts = new Set(prevExpandedPosts);
@@ -63,16 +64,16 @@ const Blog = () => {
       return newExpandedPosts;
     });
   };
-
+  
   const scrollToNextSection = () => {
     const blogSection = document.getElementById('blog');
     if (blogSection) {
       blogSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
+  
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
       
       {/* Hero Section */}
@@ -84,27 +85,72 @@ const Blog = () => {
             animate={titleVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl md:text-7xl font-orbitron font-bold mb-6 relative">
+            <h1 className="text-4xl md:text-7xl font-orbitron font-bold mb-6 relative heading-glow">
               <span className="text-cyber relative z-10">Blog</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
             </h1>
             <p className="text-xl font-fira text-foreground/80 max-w-3xl mx-auto mb-8">
-              Latest updates, announcements, and insights from WarP Computer Club
+              Discover insights, announcements, and stories from the WarP Computer Club community
             </p>
           </motion.div>
+
+          {/* Hero Stats Cards - Reduced Size */}
+          <div className="grid md:grid-cols-2 gap-4 max-w-xl mx-auto mb-8">
+            <Card className="bg-card/30 cyber-border hover:border-primary/60 transition-all duration-300">
+              <CardHeader className="text-center pb-2 pt-4">
+                <div className="flex items-center justify-center mb-2">
+                  <User className="text-primary" size={24} />
+                </div>
+                <CardTitle className="text-xl font-orbitron font-bold text-primary">
+                  {posts.length}
+                </CardTitle>
+                <p className="text-muted-foreground font-fira text-xs">Published Posts</p>
+              </CardHeader>
+              <CardContent className="pt-0 pb-4">
+                <p className="text-center font-fira text-xs text-foreground/80">
+                  Sharing knowledge, experiences, and insights from our vibrant tech community.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/30 cyber-border hover:border-secondary/60 transition-all duration-300">
+              <CardHeader className="text-center pb-2 pt-4">
+                <div className="flex items-center justify-center mb-2">
+                  <Calendar className="text-secondary" size={24} />
+                </div>
+                <CardTitle className="text-xl font-orbitron font-bold text-secondary">
+                  Weekly
+                </CardTitle>
+                <p className="text-muted-foreground font-fira text-xs">New Content</p>
+              </CardHeader>
+              <CardContent className="pt-0 pb-4">
+                <p className="text-center font-fira text-xs text-foreground/80">
+                  Regular updates with fresh content, tutorials, and community highlights.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+{/*           <div className="mt-8">
+            <Button asChild className="bg-primary hover:bg-primary/80 text-primary-foreground font-fira">
+              <Link to="/blog/form" className="flex items-center gap-2">
+                <Plus size={16} />
+                Write a Post
+              </Link>
+            </Button>
+          </div> */}
         </div>
-      
+
         <button 
           onClick={scrollToNextSection}
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer bg-transparent border-none"
-          aria-label="Scroll to next section"
+          aria-label="Scroll to blog posts"
         >
           <ChevronDown className="text-primary" size={24} />
         </button>
       </section>
-      
+
       {/* Blog Posts Section */}
-      <section id="blog" className="py-20">
+      <section id="blog" className="py-20 justify-center">
         <div className="container mx-auto px-4">
           <motion.div 
             ref={headingRef}
@@ -113,21 +159,10 @@ const Blog = () => {
             animate={headingVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative inline-block">
+            <h2 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative title-glow">
               <span className="text-cyber relative z-10">Latest Posts</span>
-              <span 
-                className="absolute inset-0 text-cyber opacity-30 blur-[2px] scale-105"
-                style={{
-                  background: 'linear-gradient(45deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--accent)))',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                Latest Posts
-              </span>
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mt-4"></div>
+            <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mB-6"></div>
           </motion.div>
 
           {/* Blog Posts Grid */}
@@ -252,6 +287,8 @@ const Blog = () => {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 };

@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
-// import Footer from '@/components/Footer';
+import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { motion } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
 
 const Contact = () => {
   const [titleRef, titleVisible] = useScrollAnimation();
@@ -47,40 +49,40 @@ const Contact = () => {
 
   const createCyberStyledEmail = (data: typeof formData) => {
     return `
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                          WarP COMPUTER CLUB                                 ║
-║                      DIGITAL COMMUNICATION PROTOCOL                         ║
-╚══════════════════════════════════════════════════════════════════════════════╝
+      ╔══════════════════════════════════════════════════════════════════════════════╗
+      ║                          WarP COMPUTER CLUB                                 ║
+      ║                      DIGITAL COMMUNICATION PROTOCOL                         ║
+      ╚══════════════════════════════════════════════════════════════════════════════╝
 
-> SYSTEM INFILTRATION SUCCESSFUL
-> ESTABLISHING SECURE CONNECTION...
-> CONNECTION ESTABLISHED
+      > SYSTEM INFILTRATION SUCCESSFUL
+      > ESTABLISHING SECURE CONNECTION...
+      > CONNECTION ESTABLISHED
 
-┌─ SENDER IDENTIFICATION ─────────────────────────────────────────────────────┐
-│ Name: ${data.name}
-│ Email: ${data.email}
-│ Timestamp: ${new Date().toISOString()}
-└─────────────────────────────────────────────────────────────────────────────┘
+      ┌─ SENDER IDENTIFICATION ─────────────────────────────────────────────────────┐
+      │ Name: ${data.name}
+      │ Email: ${data.email}
+      │ Timestamp: ${new Date().toISOString()}
+      └─────────────────────────────────────────────────────────────────────────────┘
 
-┌─ MESSAGE HEADER ────────────────────────────────────────────────────────────┐
-│ Subject: ${data.subject}
-│ Priority: HIGH
-│ Encryption: CYBER-GRADE
-└─────────────────────────────────────────────────────────────────────────────┘
+      ┌─ MESSAGE HEADER ────────────────────────────────────────────────────────────┐
+      │ Subject: ${data.subject}
+      │ Priority: HIGH
+      │ Encryption: CYBER-GRADE
+      └─────────────────────────────────────────────────────────────────────────────┘
 
-┌─ MESSAGE PAYLOAD ───────────────────────────────────────────────────────────┐
-${data.message}
-└─────────────────────────────────────────────────────────────────────────────┘
+      ┌─ MESSAGE PAYLOAD ───────────────────────────────────────────────────────────┐
+      ${data.message}
+      └─────────────────────────────────────────────────────────────────────────────┘
 
-> MESSAGE TRANSMISSION COMPLETE
-> AWAITING RESPONSE FROM WarP COMMAND CENTER...
+      > MESSAGE TRANSMISSION COMPLETE
+      > AWAITING RESPONSE FROM WarP COMMAND CENTER...
 
-╔══════════════════════════════════════════════════════════════════════════════╗
-║ This message was sent via the WarP Computer Club Contact System             ║
-║ Architecting the digital future through innovation and technology           ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-    `.trim();
-  };
+      ╔══════════════════════════════════════════════════════════════════════════════╗
+      ║ This message was sent via the WarP Computer Club Contact System             ║
+      ║ Architecting the digital future through innovation and technology           ║
+      ╚══════════════════════════════════════════════════════════════════════════════╝
+          `.trim();
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,25 +143,45 @@ ${data.message}
       setIsLoading(false);
     }
   };
+  const scrollToNextSection = () => {
+    window.scrollTo({
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+  };
 
   return (
+    // {/* Contact Section */}
     <div className="min-h-screen bg-background overflow-x-hidden" style={{ scrollBehavior: 'smooth' }}>
       <Navbar />
-      <main className="pt-24 pb-12">
-        <div className="container mx-auto px-4">
-          <div 
+      {/* Hero Section */}
+      <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div className="container mx-auto px-4 text-center z-10">
+          <motion.div 
             ref={titleRef}
-            className={`text-center mb-16 scroll-fade-in ${titleVisible ? 'animate' : ''}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={titleVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.6 }}
           >
-            <h1 className="text-3xl md:text-5xl font-orbitron font-bold mb-4 relative">
+            <h1 className="text-4xl md:text-7xl font-orbitron font-bold mb-6 relative heading-glow">
               <span className="text-cyber relative z-10">Contact Us</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 blur-xl -z-10 scale-110"></div>
             </h1>
-            <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto mb-6"></div>
-            <p className="text-lg font-fira text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl font-fira text-foreground/80 max-w-3xl mx-auto mb-8">
               Ready to connect with the digital revolution? Get in touch with us.
             </p>
-          </div>
+          </motion.div>
+        </div>
+
+        <button 
+          onClick={scrollToNextSection}
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer bg-transparent border-none"
+          aria-label="Scroll to blog posts"
+        >
+          <ChevronDown className="text-primary" size={24} />
+        </button>
+      </section>
+      <main className="pt-24 pb-12">
+        <div className="container mx-auto px-4">
 
           <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
             <Card 
@@ -303,9 +325,9 @@ ${data.message}
           </div>
         </div>
       </main>
-{/*       <Footer /> */}
+      <Footer />
     </div>
-  );
+  )
 };
 
 export default Contact;
