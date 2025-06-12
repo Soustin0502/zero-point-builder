@@ -222,21 +222,16 @@ const EventsSection = () => {
 
             <div 
             ref={eventsRef}
-            className={`relative max-w-6xl mx-auto events-container items-center scroll-fade-in ${eventsVisible ? 'animate' : ''}`}
+            className={`grid md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-16 scroll-fade-in ${eventsVisible ? 'animate' : ''}`}
             >
                 {events.map((event, index) => (
                     <Card 
                     key={index} 
-                    className={`
-                        event-card bg-card cyber-border transition-all duration-300 group
-                        ${index === 0 ? 'event-card-1' : 'event-card-2'}
-                        ${hoveredCard === index ? 'z-20' : ''}
-                        ${hoveredCard !== null && hoveredCard !== index ? 'adjacent-glow' : ''}
-                    `}
+                    className="bg-card cyber-border transition-all duration-300 group min-h-[400px] flex flex-col"
                     onMouseMove={(e) => handleCardMouseMove(e, index)}
                     onMouseLeave={handleCardMouseLeave}
                     >
-                        <CardHeader>
+                        <CardHeader className="flex-shrink-0">
                             <div className={`inline-block px-3 py-1 rounded-full text-xs font-fira uppercase tracking-wider mb-2 ${
                             event.color === 'primary' 
                                 ? 'bg-primary/20 text-primary border border-primary/30' 
@@ -250,12 +245,12 @@ const EventsSection = () => {
                                 </span>
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-4 flex-1 flex flex-col">
                             <p className="font-fira text-foreground/80 leading-relaxed">
                             {event.description}
                             </p>
                             
-                            <div className="space-y-2">
+                            <div className="space-y-2 flex-1">
                                 <h4 className="font-orbitron font-semibold text-sm uppercase tracking-wider text-muted-foreground">
                                     Key Features:
                                 </h4>
@@ -274,7 +269,7 @@ const EventsSection = () => {
                             <Button 
                             asChild
                             variant="outline" 
-                            className={`w-full font-fira ${
+                            className={`w-full font-fira mt-auto ${
                                 event.color === 'primary' 
                                 ? 'border-primary text-primary hover:bg-primary/10' 
                                 : 'border-secondary text-secondary hover:bg-secondary/10'
@@ -289,7 +284,7 @@ const EventsSection = () => {
 
             <div 
             ref={terminalRef}
-            className="text-center mt-12"
+            className="text-center mb-20"
             >
                 <div className="terminal-text bg-background/50 border border-accent/30 rounded-lg p-4 max-w-md mx-auto">
                     <div className="terminal-command text-accent mb-1"></div>
@@ -298,7 +293,7 @@ const EventsSection = () => {
                         <div className="terminal-info">WarP Inter '25: T.B.D.</div>
                     </div>
                 </div>
-            </div><br/><br/><br/><br/><br/>
+            </div>
             
             {/* Latest Posts Section */}
             <div 
