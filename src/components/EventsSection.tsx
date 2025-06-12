@@ -8,7 +8,6 @@ import { Calendar, User, ArrowRight } from 'lucide-react';
 import { gsap } from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { useGSAPScrollTrigger } from '@/hooks/useGSAPAnimation';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 gsap.registerPlugin(TextPlugin);
 
@@ -35,8 +34,26 @@ const EventsSection = () => {
     );
   }, { start: "top 80%" });
 
-  // Events cards with simple scroll animation
-  const [eventsRef, eventsVisible] = useScrollAnimation();
+  // Events cards with scroll-in animation
+  const eventsRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
+    const cards = element.querySelectorAll('.event-card');
+    
+    gsap.fromTo(cards,
+      {
+        opacity: 0,
+        y: 60,
+        scale: 0.9
+      },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "power3.out"
+      }
+    );
+  }, { start: "top 75%" });
 
   // Terminal typing animation for events schedule
   const terminalRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
@@ -113,18 +130,20 @@ const EventsSection = () => {
     );
   }, { start: "top 75%" });
 
-  // Feedbacks terminal animation - subtle scroll in
+  // Feedbacks terminal animation - scroll in with pink color
   const feedbacksTerminalRef = useGSAPScrollTrigger<HTMLDivElement>((element) => {
     gsap.fromTo(element,
       {
         opacity: 0,
-        y: 30
+        y: 60,
+        scale: 0.9
       },
       {
         opacity: 1,
         y: 0,
+        scale: 1,
         duration: 0.8,
-        ease: "power2.out"
+        ease: "power3.out"
       }
     );
   }, { start: "top 80%" });
@@ -231,13 +250,13 @@ const EventsSection = () => {
 
             <div 
             ref={eventsRef}
-            className={`relative max-w-5xl mx-auto mb-16 scroll-fade-in ${eventsVisible ? 'animate' : ''} flex justify-center items-center gap-4`}
+            className="relative max-w-5xl mx-auto mb-16 flex justify-center items-center gap-4"
             >
                 {events.map((event, index) => (
                     <Card 
                     key={index} 
                     className={`
-                        bg-card cyber-border transition-all duration-300 group min-h-[400px] flex flex-col w-80
+                        event-card bg-card cyber-border transition-all duration-300 group min-h-[400px] flex flex-col w-80
                         ${index === 0 ? '-rotate-3 origin-center z-10 -mr-8' : 'rotate-3 origin-center z-20'}
                         ${hoveredCard === index ? 'z-30' : ''}
                     `}
@@ -372,18 +391,18 @@ const EventsSection = () => {
             className="text-center mt-8"
             >
                 <div className="terminal-text bg-background/50 border border-primary/30 rounded-lg p-4 max-w-md mx-auto">
-                    <div className="text-primary mb-2 font-mono">$ blog --latest</div>
+                    <div className="text-primary mb-2 font-mono">$ feedbacks --info</div>
                     <div className="text-muted-foreground text-sm">
-                        <div>Total Posts: {blogPosts.length}</div>
-                        <div>Status: ✓ Regularly Updated</div>
+                        <div>Total Feedbacks: Active</div>
+                        <div>Status: ✓ Regularly Collected</div>
                     </div>
                 </div>
             </div>
 
             <div className="text-center mt-8">
                 <Button asChild className="bg-primary hover:bg-primary/80 text-primary-foreground font-fira">
-                    <Link to="/blog" className="flex items-center gap-2">
-                        View All Posts
+                    <Link to="/feedbacks" className="flex items-center gap-2">
+                        View All Feedbacks
                         <ArrowRight size={16} />
                     </Link>
                 </Button>

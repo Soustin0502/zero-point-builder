@@ -71,7 +71,7 @@ const HeroSection = () => {
 
   const timeline = useGSAPTimeline(createEntranceTimeline, []);
 
-  // Enhanced logo hover animation
+  // Enhanced logo hover animation with 3D perspective
   const logoRef = useGSAPAnimation<HTMLDivElement>((element) => {
     const handleMouseMove = (e: MouseEvent) => {
       const rect = element.getBoundingClientRect();
@@ -81,20 +81,29 @@ const HeroSection = () => {
       const deltaX = e.clientX - centerX;
       const deltaY = e.clientY - centerY;
       
-      const maxDistance = 30;
+      const maxDistance = 100;
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
       
       if (distance > 0) {
         const normalizedX = deltaX / distance;
         const normalizedY = deltaY / distance;
         
-        const moveDistance = Math.min(distance * 0.4, maxDistance);
+        const moveDistance = Math.min(distance * 0.3, maxDistance);
+        
+        // 3D perspective effect
+        const rotateX = (normalizedY * moveDistance * 0.1);
+        const rotateY = (-normalizedX * moveDistance * 0.1);
         
         gsap.to(element.querySelector('.hero-logo'), {
-          x: -normalizedX * moveDistance,
-          y: -normalizedY * moveDistance,
+          x: -normalizedX * moveDistance * 0.2,
+          y: -normalizedY * moveDistance * 0.2,
+          rotationX: rotateX,
+          rotationY: rotateY,
+          z: 50,
           duration: 0.6,
-          ease: "power2.out"
+          ease: "power2.out",
+          transformPerspective: 1000,
+          transformStyle: "preserve-3d"
         });
       }
     };
@@ -103,6 +112,9 @@ const HeroSection = () => {
       gsap.to(element.querySelector('.hero-logo'), {
         x: 0,
         y: 0,
+        rotationX: 0,
+        rotationY: 0,
+        z: 0,
         duration: 0.8,
         ease: "elastic.out(1, 0.3)"
       });
@@ -194,11 +206,13 @@ const HeroSection = () => {
           <div 
             ref={logoRef}
             className="mb-6 inline-block relative"
+            style={{ perspective: '1000px' }}
           >
             <img 
               src="./WARP TEXT HORIZ.png" 
               alt="WarP Logo" 
               className="hero-logo h-24 md:h-32 mx-auto transition-transform duration-300 ease-out relative z-0"
+              style={{ transformStyle: 'preserve-3d' }}
             />
           </div>
           
